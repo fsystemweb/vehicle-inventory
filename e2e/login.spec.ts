@@ -13,9 +13,7 @@ test.describe("route protection", () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
-  test("unauthenticated /dashboard redirects to /login", async ({
-    page,
-  }) => {
+  test("unauthenticated /dashboard redirects to /login", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/login$/);
   });
@@ -55,13 +53,13 @@ test.describe("signup", () => {
       "Supabase's signup email rate limit was hit — not a code issue, retry later",
     );
 
-    expect(outcome, "expected dashboard redirect or confirmation message").not
-      .toBeNull();
+    expect(
+      outcome,
+      "expected dashboard redirect or confirmation message",
+    ).not.toBeNull();
   });
 
-  test("shows an error for an invalid signup submission", async ({
-    page,
-  }) => {
+  test("shows an error for an invalid signup submission", async ({ page }) => {
     await page.goto("/signup");
     await page.getByLabel("Email").fill("not-an-email");
     await page.getByLabel("Password").fill("short");
