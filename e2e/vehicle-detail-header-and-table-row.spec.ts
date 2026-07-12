@@ -32,7 +32,10 @@ test.describe("vehicle detail header + table row affordances", () => {
     // (unscrolled) viewport.
     const viewport = page.viewportSize();
     const box = await editButton.boundingBox();
-    expect(box, "Edit vehicle button should have a bounding box").not.toBeNull();
+    expect(
+      box,
+      "Edit vehicle button should have a bounding box",
+    ).not.toBeNull();
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
 
@@ -84,7 +87,9 @@ test.describe("vehicle detail header + table row affordances", () => {
     const vinCell = row.locator("td").nth(1);
     await vinCell.hover();
 
-    const hoverBg = await row.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const hoverBg = await row.evaluate(
+      (el) => getComputedStyle(el).backgroundColor,
+    );
     expect(hoverBg).not.toBe("rgba(0, 0, 0, 0)");
     expect(hoverBg).not.toBe("transparent");
 
