@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardSummaryCards } from "@/components/vehicles/DashboardSummaryCards";
 import { VehicleFilterStack } from "@/components/vehicles/VehicleFilterStack";
+import { VehiclePagination } from "@/components/vehicles/VehiclePagination";
 import { VehicleTable } from "@/components/vehicles/VehicleTable";
 import {
   getDashboardSummary,
@@ -41,6 +42,7 @@ type DashboardPageProps = {
     receivedDateTo?: string;
     sort?: string;
     direction?: string;
+    page?: string;
   }>;
 };
 
@@ -93,6 +95,7 @@ function parseFilters(
     receivedDateTo: params.receivedDateTo,
     sort,
     direction,
+    page: parseNumberParam(params.page),
   };
 }
 
@@ -133,7 +136,13 @@ export default async function DashboardPage({
       <VehicleFilterStack />
 
       {vehiclesResult.success ? (
-        <VehicleTable vehicles={vehiclesResult.vehicles} filters={filters} />
+        <>
+          <VehicleTable vehicles={vehiclesResult.vehicles} filters={filters} />
+          <VehiclePagination
+            filters={filters}
+            pagination={vehiclesResult.pagination}
+          />
+        </>
       ) : (
         <p className="rounded-lg border border-line p-4 text-sm text-danger">
           {vehiclesResult.error}

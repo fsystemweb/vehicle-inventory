@@ -45,15 +45,27 @@ const vehicle = (overrides: Partial<Vehicle> = {}): Vehicle => ({
 describe("listVehicles", () => {
   it("returns vehicles from the repository on success", async () => {
     const vehicles = [vehicle()];
-    mockedRepo.listVehicles.mockResolvedValue({ data: vehicles, error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: vehicles,
+      error: null,
+      count: 1,
+    });
 
     const result = await listVehicles({});
 
-    expect(result).toEqual({ success: true, vehicles });
+    expect(result).toEqual({
+      success: true,
+      vehicles,
+      pagination: { page: 1, pageSize: 20, totalCount: 1, totalPages: 1 },
+    });
   });
 
   it("ignores an unrecognized status filter", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ status: "BOGUS" as never });
 
@@ -63,7 +75,11 @@ describe("listVehicles", () => {
   });
 
   it("ignores an unrecognized condition filter", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ condition: "BOGUS" as never });
 
@@ -73,7 +89,11 @@ describe("listVehicles", () => {
   });
 
   it("omits the search filter when the search term is empty or whitespace", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ search: "   " });
 
@@ -83,7 +103,11 @@ describe("listVehicles", () => {
   });
 
   it("sanitizes commas and wildcard characters out of the search term", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ search: "toyota, 50%_off" });
 
@@ -93,7 +117,11 @@ describe("listVehicles", () => {
   });
 
   it("defaults sort to received_date/desc when the sort field is invalid", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ sort: "bogus" as never });
 
@@ -106,6 +134,7 @@ describe("listVehicles", () => {
     mockedRepo.listVehicles.mockResolvedValue({
       data: null,
       error: { message: "connection error" } as never,
+      count: null,
     });
 
     const result = await listVehicles({});
@@ -117,7 +146,11 @@ describe("listVehicles", () => {
   });
 
   it("passes through sanitized single-column text filters", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({
       vin: " 1FTFW1E5%_",
@@ -139,7 +172,11 @@ describe("listVehicles", () => {
   });
 
   it("omits single-column text filters that are empty or whitespace", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ vin: "   ", stockNumber: "" });
 
@@ -152,7 +189,11 @@ describe("listVehicles", () => {
   });
 
   it("passes through year/mileage/msrp range filters", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({
       yearMin: 2020,
@@ -176,7 +217,11 @@ describe("listVehicles", () => {
   });
 
   it("drops a numeric range filter entirely when min is greater than max", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ yearMin: 2024, yearMax: 2020 });
 
@@ -189,7 +234,11 @@ describe("listVehicles", () => {
   });
 
   it("ignores a non-finite numeric range value", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ mileageMin: Number.NaN, mileageMax: 50000 });
 
@@ -202,7 +251,11 @@ describe("listVehicles", () => {
   });
 
   it("passes through a valid received-date range", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({
       receivedDateFrom: "2026-01-01",
@@ -218,7 +271,11 @@ describe("listVehicles", () => {
   });
 
   it("drops a received-date range when from is after to", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({
       receivedDateFrom: "2026-06-30",
@@ -234,13 +291,213 @@ describe("listVehicles", () => {
   });
 
   it("drops a malformed received-date value", async () => {
-    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
 
     await listVehicles({ receivedDateFrom: "not-a-date" });
 
     expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
       expect.not.objectContaining({ receivedDateFrom: expect.anything() }),
     );
+  });
+
+  it("defaults page to 1 and pageSize to 20 when omitted", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    await listVehicles({});
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 20 }),
+    );
+  });
+
+  it("clamps a page below 1 back to page 1", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    await listVehicles({ page: -5 });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1 }),
+    );
+  });
+
+  it("floors a non-integer page value", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    await listVehicles({ page: 2.9 });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2 }),
+    );
+  });
+
+  it("ignores a non-finite page value and falls back to 1", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    await listVehicles({ page: Number.NaN });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1 }),
+    );
+  });
+
+  it("passes a valid page through unchanged", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    await listVehicles({ page: 3 });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 3, pageSize: 20 }),
+    );
+  });
+
+  it("computes totalPages from the repository count and the fixed page size", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 45,
+    });
+
+    const result = await listVehicles({ page: 2 });
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: [],
+      pagination: { page: 2, pageSize: 20, totalCount: 45, totalPages: 3 },
+    });
+  });
+
+  it("reports a single total page when there are no matching rows", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: 0,
+    });
+
+    const result = await listVehicles({});
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: [],
+      pagination: { page: 1, pageSize: 20, totalCount: 0, totalPages: 1 },
+    });
+  });
+
+  it("treats a null count from the repository as zero total results", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: [],
+      error: null,
+      count: null,
+    });
+
+    const result = await listVehicles({});
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: [],
+      pagination: { page: 1, pageSize: 20, totalCount: 0, totalPages: 1 },
+    });
+  });
+
+  it("recovers onto the actual last page when the requested page is out of range", async () => {
+    const lastPageVehicles = [vehicle({ id: 45 })];
+
+    mockedRepo.listVehicles
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: "PGRST103", message: "range not satisfiable" } as never,
+        count: null,
+      })
+      .mockResolvedValueOnce({ data: [], error: null, count: 45 })
+      .mockResolvedValueOnce({
+        data: lastPageVehicles,
+        error: null,
+        count: 45,
+      });
+
+    const result = await listVehicles({ page: 999 });
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: lastPageVehicles,
+      pagination: { page: 3, pageSize: 20, totalCount: 45, totalPages: 3 },
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ page: 999 }),
+    );
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ page: 1 }),
+    );
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ page: 3 }),
+    );
+  });
+
+  it("falls back to the already-fetched page 1 when there's only one page", async () => {
+    const onlyPageVehicles = [vehicle()];
+
+    mockedRepo.listVehicles
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: "PGRST103", message: "range not satisfiable" } as never,
+        count: null,
+      })
+      .mockResolvedValueOnce({
+        data: onlyPageVehicles,
+        error: null,
+        count: 3,
+      });
+
+    const result = await listVehicles({ page: 12 });
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: onlyPageVehicles,
+      pagination: { page: 1, pageSize: 20, totalCount: 3, totalPages: 1 },
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
+  });
+
+  it("still returns a friendly error for a non-range repository failure", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: null,
+      error: { code: "500", message: "connection error" } as never,
+      count: null,
+    });
+
+    const result = await listVehicles({ page: 5 });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Unable to load vehicles. Please try again.",
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(1);
   });
 });
 

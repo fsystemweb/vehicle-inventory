@@ -84,6 +84,27 @@ export type VehicleListFilters = {
   receivedDateTo?: string;
   sort?: VehicleSortField;
   direction?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+};
+
+/**
+ * Fixed page size for the vehicle list. Shared by the service (which
+ * normalizes `pageSize` to this value) and the repository (which defends
+ * against being called with an un-normalized filter object directly).
+ */
+export const VEHICLE_LIST_PAGE_SIZE = 20;
+
+/**
+ * Pagination metadata returned alongside a page of vehicles so the UI can
+ * render prev/next controls and a "X of Y" indicator without recomputing
+ * anything from the raw filters.
+ */
+export type VehiclePaginationMeta = {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 };
 
 /**
