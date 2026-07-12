@@ -45,9 +45,7 @@ test.describe("vehicle inventory dashboard", () => {
     await expect(kpiValue(page, "Pending")).toHaveText("2");
     await expect(kpiValue(page, "In Transit")).toHaveText("2");
     await expect(kpiValue(page, "Sold This Month")).toHaveText("2");
-    await expect(kpiValue(page, "Total In-Stock Value")).toHaveText(
-      "$339,300",
-    );
+    await expect(kpiValue(page, "Total In-Stock Value")).toHaveText("$339,300");
 
     // Table is populated with seeded vehicles.
     await expect(page.getByRole("table")).toBeVisible();
@@ -72,9 +70,7 @@ test.describe("vehicle inventory dashboard", () => {
     await expect(statusCells).toHaveCount(2);
   });
 
-  test("searching narrows the table to matching vehicles", async ({
-    page,
-  }) => {
+  test("searching narrows the table to matching vehicles", async ({ page }) => {
     await page.getByLabel("Search vehicles").fill("Silverado");
 
     // Debounced search — wait for the URL (and thus the server-rendered
