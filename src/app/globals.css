@@ -3,11 +3,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Design system tokens — see .claude/skills/design-system */
+  --violet: #6f3af2;
+  --violet-dark: #5f2fd1;
+  --line: #e5dcf6;
+  --muted: #6e6489;
+  --danger: #dc2626;
+  --mist: #f3effb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-violet: var(--violet);
+  --color-violet-dark: var(--violet-dark);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
+  --color-mist: var(--mist);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
