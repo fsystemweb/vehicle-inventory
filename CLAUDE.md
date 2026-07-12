@@ -35,6 +35,39 @@ src/
 
 If you hit a lint error from `no-restricted-imports` on a Supabase or repository import, that's the boundary rule working as intended — fix the layering, don't disable the rule.
 
+## Database (Supabase)
+
+Schema lives in `supabase/migrations/*.sql`, drafted by the `migration` agent (see `.claude/agents/migration.md`). Every migration must enable RLS with explicit policies before it's done.
+
+### Local development
+
+Requires Docker running.
+
+```bash
+npx supabase start   # boots local Postgres/Studio (once per Docker session)
+npx supabase db reset # applies every migration in supabase/migrations/, then supabase/seed.sql
+```
+
+`supabase/seed.sql` only runs automatically via `db reset` locally — it does **not** run automatically against a remote project.
+
+### Applying a migration to the shared/remote project
+
+The app's runtime already points at the shared project via `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env`, but the Supabase CLI needs its own, separate auth to run schema commands (`link`, `db push`, `db query`) — that's a personal credential, not the app's anon key, and `supabase login`'s browser flow doesn't work non-interactively (e.g. from an agent/CI shell), so use a personal access token instead:
+
+1. Generate one at https://supabase.com/dashboard/account/tokens — each engineer/agent uses their own; never share or commit one.
+2. Find the project ref: it's the subdomain in `NEXT_PUBLIC_SUPABASE_URL` (`https://<project-ref>.supabase.co`) — not secret, safe to share/document.
+3. Link and push:
+   ```bash
+   export SUPABASE_ACCESS_TOKEN=<your personal access token>
+   npx supabase link --project-ref <project-ref>
+   npx supabase db push                                     # applies pending migrations
+   npx supabase db query --linked --file supabase/seed.sql  # only if you also want to (re)seed demo data
+   ```
+   `db push` applies migrations only — there's no remote equivalent of `db reset`'s auto-seed, so seeding a remote project is a deliberate, separate step via `db query --linked --file`.
+4. Never put `SUPABASE_ACCESS_TOKEN` in any committed file, including `.env.local` — export it for the session/command only.
+
+Applying a migration or seed to the remote project is never done without the user's explicit confirmation — see `.claude/agents/migration.md`.
+
 ## Git Workflow
 
 All feature work — whether done directly or by a subagent — uses standard branching and Conventional Commits. This applies to the `build-feature` and `migration` agents in particular, since they're the ones that write code and schema changes.
