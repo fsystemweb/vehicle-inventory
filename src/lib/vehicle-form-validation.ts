@@ -59,7 +59,7 @@ export function getVehicleFormErrors(
     errors.model = "Model is required.";
   }
 
-  const maxYear = now.getUTCFullYear() + 2;
+  const maxYear = now.getUTCFullYear();
   const year = values.year.trim() === "" ? NaN : Number(values.year);
   if (Number.isNaN(year) || year < MIN_YEAR || year > maxYear) {
     errors.year = `Year must be between ${MIN_YEAR} and ${maxYear}.`;

@@ -322,6 +322,31 @@ describe("createVehicle", () => {
     });
   });
 
+  it("rejects a year greater than the current year", async () => {
+    // Regression test: the max bound was previously erroneously current
+    // year + 2, letting future-dated vehicles slip through validation.
+    const nextYear = new Date().getUTCFullYear() + 1;
+
+    const result = await createVehicle(validInput({ year: nextYear }));
+
+    expect(result.success).toBe(false);
+    expect(result).toEqual({
+      success: false,
+      error: expect.stringContaining("Year must be between"),
+    });
+    expect(mockedRepo.createVehicle).not.toHaveBeenCalled();
+  });
+
+  it("accepts a year equal to the current year", async () => {
+    const currentYear = new Date().getUTCFullYear();
+    const created = vehicle({ year: currentYear });
+    mockedRepo.createVehicle.mockResolvedValue({ data: created, error: null });
+
+    const result = await createVehicle(validInput({ year: currentYear }));
+
+    expect(result).toEqual({ success: true, vehicle: created });
+  });
+
   it("rejects negative mileage", async () => {
     const result = await createVehicle(validInput({ mileage: -1 }));
 
@@ -459,6 +484,21 @@ describe("updateVehicle", () => {
     expect(result).toEqual({
       success: false,
       error: "VIN must be 17 characters.",
+    });
+    expect(mockedRepo.updateVehicle).not.toHaveBeenCalled();
+  });
+
+  it("rejects a year greater than the current year on edit", async () => {
+    // Regression test: editing a vehicle must be held to the same
+    // current-year max bound as creating one.
+    const nextYear = new Date().getUTCFullYear() + 1;
+
+    const result = await updateVehicle(1, validInput({ year: nextYear }));
+
+    expect(result.success).toBe(false);
+    expect(result).toEqual({
+      success: false,
+      error: expect.stringContaining("Year must be between"),
     });
     expect(mockedRepo.updateVehicle).not.toHaveBeenCalled();
   });

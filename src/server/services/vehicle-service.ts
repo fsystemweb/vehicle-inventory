@@ -62,7 +62,7 @@ function validateVehicleInput(
     return "Model is required.";
   }
 
-  const maxYear = now.getUTCFullYear() + 2;
+  const maxYear = now.getUTCFullYear();
   if (
     input.year == null ||
     Number.isNaN(input.year) ||
