@@ -128,6 +128,92 @@ test.describe("vehicle form real-time validation", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
   });
 
+  test("Add Vehicle: a year beyond the current year is rejected in real time, while the current year is accepted", async ({
+    page,
+  }) => {
+    // Regression test for the year-max-bound fix: the max bound must be the
+    // current year, not current year + N.
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+
+    await page.goto("/dashboard/vehicles/new");
+
+    const submitButton = page.getByRole("button", { name: /Add Vehicle/i });
+    const yearInput = page.getByLabel("Year");
+
+    // Fill the other required fields with valid values so the year field is
+    // the only thing gating validity/submit.
+    await page.getByLabel("VIN").fill(uniqueVin());
+    await page.getByLabel("Stock #").fill(uniqueStockNumber());
+    await page.getByLabel("Make").fill("Honda");
+    await page.getByLabel("Model").fill("Civic");
+    await page.getByLabel("Mileage").fill("1200");
+    await page.getByLabel("Condition").selectOption("NEW");
+
+    await yearInput.fill(String(nextYear));
+    await page.getByLabel("Model").focus();
+    await expect(
+      page.getByText(`Year must be between 1980 and ${currentYear}.`),
+    ).toBeVisible();
+    await expect(submitButton).toBeDisabled();
+
+    // Now set it to exactly the current year — should clear the error and,
+    // combined with the already-valid fields above, enable submit.
+    await yearInput.fill(String(currentYear));
+    await page.getByLabel("Model").focus();
+    await expect(
+      page.getByText(`Year must be between 1980 and ${currentYear}.`),
+    ).toHaveCount(0);
+    await expect(submitButton).toBeEnabled();
+  });
+
+  test("Edit Vehicle: a year beyond the current year is rejected in real time on an existing record", async ({
+    page,
+  }) => {
+    // Regression test for the year-max-bound fix on the edit form.
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+    const stockNumber = uniqueStockNumber();
+    const vin = uniqueVin();
+
+    await page.goto("/dashboard/vehicles/new");
+    await page.getByLabel("VIN").fill(vin);
+    await page.getByLabel("Stock #").fill(stockNumber);
+    await page.getByLabel("Year").fill("2021");
+    await page.getByLabel("Make").fill("Ford");
+    await page.getByLabel("Model").fill("Focus");
+    await page.getByLabel("Mileage").fill("30000");
+    await page.getByLabel("Condition").selectOption("USED");
+    await page.getByRole("button", { name: /Add Vehicle/i }).click();
+    await expect(page).toHaveURL(/\/dashboard\/vehicles\/(\d+)$/);
+
+    await page.getByRole("link", { name: /Edit/i }).click();
+    await expect(page).toHaveURL(/\/dashboard\/vehicles\/\d+\/edit$/);
+
+    const saveButton = page.getByRole("button", { name: /Save Changes/i });
+    const yearInput = page.getByLabel("Year");
+
+    await yearInput.fill(String(nextYear));
+    await page.getByLabel("Model").focus();
+    await expect(
+      page.getByText(`Year must be between 1980 and ${currentYear}.`),
+    ).toBeVisible();
+    await expect(saveButton).toBeDisabled();
+
+    // Clean up: put the year back to a valid value and delete the record so
+    // other specs asserting exact row/KPI counts aren't affected.
+    await yearInput.fill(String(currentYear));
+    await page.getByLabel("Model").focus();
+    await expect(saveButton).toBeEnabled();
+
+    page.once("dialog", (dialog) => dialog.accept());
+    // Navigate back to the detail page to delete without persisting the
+    // year change (deleting is available from the detail page, not edit).
+    await page.goto(`${new URL(page.url()).pathname.replace(/\/edit$/, "")}`);
+    await page.getByRole("button", { name: /Delete/i }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+  });
+
   test("Edit Vehicle: existing values populate correctly and remain valid/submittable unchanged", async ({
     page,
   }) => {
