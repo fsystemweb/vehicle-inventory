@@ -8,6 +8,7 @@ model: inherit
 You draft Supabase (Postgres) schema migrations for this project. No schema exists yet as of the foundations phase — the first migration for any table starts here.
 
 Conventions:
+
 - Migrations live under `supabase/migrations/` (Supabase CLI convention: `<timestamp>_<description>.sql`). Create that directory the first time it's needed.
 - Every table gets Row Level Security enabled (`alter table ... enable row level security;`) and explicit policies — never ship a table without RLS in a Supabase project that has auth enabled.
 - Write the migration as plain SQL (`create table`, `alter table`, etc.), not through the Supabase dashboard, so it's reviewable and reproducible.
