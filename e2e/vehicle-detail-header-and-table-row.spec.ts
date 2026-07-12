@@ -81,28 +81,31 @@ test.describe("vehicle detail header + table row affordances", () => {
       (el) => getComputedStyle(el).color,
     );
 
-    // Hover over a cell that is NOT the Stock # link/text (VIN cell) and
-    // confirm the row's background changes (hover:bg-mist) and clicking
-    // there still navigates via the stretched-link overlay.
+    // Hover over a cell that is NOT the Stock # link/text (VIN cell). The
+    // stretched-link overlay (after:absolute after:inset-0, positioned
+    // relative to the `tr`) covers the whole row, so Playwright's strict
+    // actionability check refuses a plain hover here (it detects the anchor's
+    // pseudo-element as the top hit-test target) — that's exactly the
+    // intended "click anywhere in the row" behavior, not a bug, so force the
+    // hover the way a real mouse-move still would.
     const vinCell = row.locator("td").nth(1);
-    await vinCell.hover();
+    await vinCell.hover({ force: true });
 
-    const hoverBg = await row.evaluate(
-      (el) => getComputedStyle(el).backgroundColor,
-    );
-    expect(hoverBg).not.toBe("rgba(0, 0, 0, 0)");
-    expect(hoverBg).not.toBe("transparent");
+    // `transition-colors` animates the hover background in, so poll rather
+    // than reading the computed style once immediately after the hover.
+    await expect
+      .poll(() => row.evaluate((el) => getComputedStyle(el).backgroundColor))
+      .not.toBe("rgba(0, 0, 0, 0)");
 
-    const hoverColor = await chevron.evaluate(
-      (el) => getComputedStyle(el).color,
-    );
-    expect(hoverColor).not.toBe(restColor);
+    await expect
+      .poll(() => chevron.evaluate((el) => getComputedStyle(el).color))
+      .not.toBe(restColor);
 
     await page.screenshot({ path: "test-results/qa-vehicle-table-hover.png" });
 
     // Click on the VIN cell (plain text, not the Stock # link itself) and
     // confirm it still navigates to the detail page via the stretched link.
-    await vinCell.click();
+    await vinCell.click({ force: true });
     await expect(page).toHaveURL(/\/dashboard\/vehicles\/\d+$/);
   });
 });
