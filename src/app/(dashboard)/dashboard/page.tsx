@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DashboardSummaryCards } from "@/components/vehicles/DashboardSummaryCards";
 import { VehicleFilterBar } from "@/components/vehicles/VehicleFilterBar";
 import { VehicleTable } from "@/components/vehicles/VehicleTable";
@@ -65,9 +66,17 @@ export default async function DashboardPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted">Vehicle inventory overview.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted">Vehicle inventory overview.</p>
+        </div>
+        <Link
+          href="/dashboard/vehicles/new"
+          className="rounded-md bg-violet px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-dark"
+        >
+          Add Vehicle
+        </Link>
       </div>
 
       {summaryResult.success ? (
