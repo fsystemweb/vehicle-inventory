@@ -63,6 +63,7 @@ Keep commits scoped to one logical change; don't bundle an unrelated fix into a 
 - `code-review` agent — reviews a diff for boundary violations and correctness.
 - `migration` agent — drafts Supabase schema migrations (SQL, with RLS).
 - `scaffold-crud`, `react-form`, `api-endpoint` skills — implementation patterns for CRUD, forms, and API routes respectively.
+- `design-system` skill — the visual design system (colors, typography, spacing, radius, motion, components) all UI work in this repo should follow.
 
 These are draft/initial versions written during the foundations phase, before any Vehicle Inventory feature work has started. Expect to refine them as real features are built.
 
