@@ -115,6 +115,133 @@ describe("listVehicles", () => {
       error: "Unable to load vehicles. Please try again.",
     });
   });
+
+  it("passes through sanitized single-column text filters", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({
+      vin: " 1FTFW1E5%_",
+      stockNumber: "STK_1001",
+      make: "Toy%ota",
+      model: "Camry",
+      location: "Lot A",
+    });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        vin: "1FTFW1E5\\%\\_",
+        stockNumber: "STK\\_1001",
+        make: "Toy\\%ota",
+        model: "Camry",
+        location: "Lot A",
+      }),
+    );
+  });
+
+  it("omits single-column text filters that are empty or whitespace", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({ vin: "   ", stockNumber: "" });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        vin: expect.anything(),
+        stockNumber: expect.anything(),
+      }),
+    );
+  });
+
+  it("passes through year/mileage/msrp range filters", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({
+      yearMin: 2020,
+      yearMax: 2024,
+      mileageMin: 0,
+      mileageMax: 50000,
+      msrpMin: 20000,
+      msrpMax: 40000,
+    });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yearMin: 2020,
+        yearMax: 2024,
+        mileageMin: 0,
+        mileageMax: 50000,
+        msrpMin: 20000,
+        msrpMax: 40000,
+      }),
+    );
+  });
+
+  it("drops a numeric range filter entirely when min is greater than max", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({ yearMin: 2024, yearMax: 2020 });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        yearMin: expect.anything(),
+        yearMax: expect.anything(),
+      }),
+    );
+  });
+
+  it("ignores a non-finite numeric range value", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({ mileageMin: Number.NaN, mileageMax: 50000 });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({ mileageMax: 50000 }),
+    );
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.not.objectContaining({ mileageMin: expect.anything() }),
+    );
+  });
+
+  it("passes through a valid received-date range", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({
+      receivedDateFrom: "2026-01-01",
+      receivedDateTo: "2026-06-30",
+    });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        receivedDateFrom: "2026-01-01",
+        receivedDateTo: "2026-06-30",
+      }),
+    );
+  });
+
+  it("drops a received-date range when from is after to", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({
+      receivedDateFrom: "2026-06-30",
+      receivedDateTo: "2026-01-01",
+    });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        receivedDateFrom: expect.anything(),
+        receivedDateTo: expect.anything(),
+      }),
+    );
+  });
+
+  it("drops a malformed received-date value", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({ data: [], error: null });
+
+    await listVehicles({ receivedDateFrom: "not-a-date" });
+
+    expect(mockedRepo.listVehicles).toHaveBeenCalledWith(
+      expect.not.objectContaining({ receivedDateFrom: expect.anything() }),
+    );
+  });
 });
 
 describe("getDashboardSummary", () => {

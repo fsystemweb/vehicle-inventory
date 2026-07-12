@@ -37,6 +37,58 @@ export async function listVehicles(
     );
   }
 
+  if (filters.vin) {
+    query = query.ilike("vin", `%${filters.vin}%`);
+  }
+
+  if (filters.stockNumber) {
+    query = query.ilike("stock_number", `%${filters.stockNumber}%`);
+  }
+
+  if (filters.make) {
+    query = query.ilike("make", `%${filters.make}%`);
+  }
+
+  if (filters.model) {
+    query = query.ilike("model", `%${filters.model}%`);
+  }
+
+  if (filters.location) {
+    query = query.ilike("location", `%${filters.location}%`);
+  }
+
+  if (filters.yearMin != null) {
+    query = query.gte("year", filters.yearMin);
+  }
+
+  if (filters.yearMax != null) {
+    query = query.lte("year", filters.yearMax);
+  }
+
+  if (filters.mileageMin != null) {
+    query = query.gte("mileage", filters.mileageMin);
+  }
+
+  if (filters.mileageMax != null) {
+    query = query.lte("mileage", filters.mileageMax);
+  }
+
+  if (filters.msrpMin != null) {
+    query = query.gte("msrp", filters.msrpMin);
+  }
+
+  if (filters.msrpMax != null) {
+    query = query.lte("msrp", filters.msrpMax);
+  }
+
+  if (filters.receivedDateFrom) {
+    query = query.gte("received_date", filters.receivedDateFrom);
+  }
+
+  if (filters.receivedDateTo) {
+    query = query.lte("received_date", filters.receivedDateTo);
+  }
+
   query = query.order(filters.sort ?? "received_date", {
     ascending: filters.direction === "asc",
   });

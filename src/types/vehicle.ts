@@ -69,9 +69,47 @@ export type VehicleListFilters = {
   status?: VehicleStatus;
   condition?: VehicleCondition;
   search?: string;
+  vin?: string;
+  stockNumber?: string;
+  make?: string;
+  model?: string;
+  location?: string;
+  yearMin?: number;
+  yearMax?: number;
+  mileageMin?: number;
+  mileageMax?: number;
+  msrpMin?: number;
+  msrpMax?: number;
+  receivedDateFrom?: string;
+  receivedDateTo?: string;
   sort?: VehicleSortField;
   direction?: "asc" | "desc";
 };
+
+/**
+ * Query-param keys for every filterable column, excluding `sort`/`direction`.
+ * Shared by the filter stack UI (to render/clear chips) and by
+ * `VehicleTable`'s sort-link builder (to carry active filters across a sort
+ * change) so both stay in sync with `VehicleListFilters`.
+ */
+export const VEHICLE_FILTER_PARAM_KEYS = [
+  "status",
+  "condition",
+  "search",
+  "vin",
+  "stockNumber",
+  "make",
+  "model",
+  "location",
+  "yearMin",
+  "yearMax",
+  "mileageMin",
+  "mileageMax",
+  "msrpMin",
+  "msrpMax",
+  "receivedDateFrom",
+  "receivedDateTo",
+] as const satisfies readonly (keyof VehicleListFilters)[];
 
 export type DashboardSummary = {
   inStockCount: number;

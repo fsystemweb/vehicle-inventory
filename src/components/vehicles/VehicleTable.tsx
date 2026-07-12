@@ -3,10 +3,11 @@ import { ConditionBadge } from "@/components/vehicles/ConditionBadge";
 import { StatusBadge } from "@/components/vehicles/StatusBadge";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { formatCurrency, formatMileage } from "@/lib/format";
-import type {
-  Vehicle,
-  VehicleListFilters,
-  VehicleSortField,
+import {
+  VEHICLE_FILTER_PARAM_KEYS,
+  type Vehicle,
+  type VehicleListFilters,
+  type VehicleSortField,
 } from "@/types/vehicle";
 
 const SORTABLE_COLUMNS: {
@@ -28,9 +29,12 @@ const SORTABLE_COLUMNS: {
 function buildSortHref(filters: VehicleListFilters, field: VehicleSortField) {
   const params = new URLSearchParams();
 
-  if (filters.status) params.set("status", filters.status);
-  if (filters.condition) params.set("condition", filters.condition);
-  if (filters.search) params.set("search", filters.search);
+  for (const key of VEHICLE_FILTER_PARAM_KEYS) {
+    const value = filters[key];
+    if (value != null && value !== "") {
+      params.set(key, String(value));
+    }
+  }
 
   params.set("sort", field);
   const nextDirection =

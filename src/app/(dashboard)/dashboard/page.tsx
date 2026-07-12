@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardSummaryCards } from "@/components/vehicles/DashboardSummaryCards";
-import { VehicleFilterBar } from "@/components/vehicles/VehicleFilterBar";
+import { VehicleFilterStack } from "@/components/vehicles/VehicleFilterStack";
 import { VehicleTable } from "@/components/vehicles/VehicleTable";
 import {
   getDashboardSummary,
@@ -26,10 +26,34 @@ type DashboardPageProps = {
     status?: string;
     condition?: string;
     search?: string;
+    vin?: string;
+    stockNumber?: string;
+    make?: string;
+    model?: string;
+    location?: string;
+    yearMin?: string;
+    yearMax?: string;
+    mileageMin?: string;
+    mileageMax?: string;
+    msrpMin?: string;
+    msrpMax?: string;
+    receivedDateFrom?: string;
+    receivedDateTo?: string;
     sort?: string;
     direction?: string;
   }>;
 };
+
+/**
+ * Parses a query-param string into a number, returning `undefined` when the
+ * param is missing or doesn't parse cleanly — raw search params can't be
+ * trusted, so a non-numeric value is dropped rather than forwarded as NaN.
+ */
+function parseNumberParam(raw: string | undefined): number | undefined {
+  if (!raw) return undefined;
+  const parsed = Number(raw);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
 
 function parseFilters(
   params: Awaited<DashboardPageProps["searchParams"]>,
@@ -50,7 +74,26 @@ function parseFilters(
 
   const direction = params.direction === "asc" ? "asc" : "desc";
 
-  return { status, condition, search: params.search, sort, direction };
+  return {
+    status,
+    condition,
+    search: params.search,
+    vin: params.vin,
+    stockNumber: params.stockNumber,
+    make: params.make,
+    model: params.model,
+    location: params.location,
+    yearMin: parseNumberParam(params.yearMin),
+    yearMax: parseNumberParam(params.yearMax),
+    mileageMin: parseNumberParam(params.mileageMin),
+    mileageMax: parseNumberParam(params.mileageMax),
+    msrpMin: parseNumberParam(params.msrpMin),
+    msrpMax: parseNumberParam(params.msrpMax),
+    receivedDateFrom: params.receivedDateFrom,
+    receivedDateTo: params.receivedDateTo,
+    sort,
+    direction,
+  };
 }
 
 export default async function DashboardPage({
@@ -87,7 +130,7 @@ export default async function DashboardPage({
         </p>
       )}
 
-      <VehicleFilterBar />
+      <VehicleFilterStack />
 
       {vehiclesResult.success ? (
         <VehicleTable vehicles={vehiclesResult.vehicles} filters={filters} />
