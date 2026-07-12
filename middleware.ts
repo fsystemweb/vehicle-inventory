@@ -41,6 +41,13 @@ export async function middleware(request: NextRequest) {
   const user = data.user;
 
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/") {
+    return NextResponse.redirect(
+      new URL(user ? "/dashboard" : "/login", request.url),
+    );
+  }
+
   const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix),
   );
