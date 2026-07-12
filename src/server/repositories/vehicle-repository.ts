@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Vehicle, VehicleListFilters } from "@/types/vehicle";
+import type {
+  Vehicle,
+  VehicleInput,
+  VehicleListFilters,
+} from "@/types/vehicle";
 import type { PostgrestError } from "@supabase/supabase-js";
 
 export type RepositoryResult<T> = {
@@ -55,4 +59,67 @@ export async function getVehicleAggregateRows(): Promise<
     .select("status, msrp, sold_date");
 
   return { data, error };
+}
+
+/**
+ * Fetches a single vehicle by id. `data` is `null` (with no error) when no
+ * row matches, so callers can distinguish "not found" from a real failure.
+ */
+export async function getVehicleById(
+  id: number,
+): Promise<RepositoryResult<Vehicle | null>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vehicles")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  return { data, error };
+}
+
+/**
+ * Inserts a new vehicle row.
+ */
+export async function createVehicle(
+  input: VehicleInput,
+): Promise<RepositoryResult<Vehicle>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vehicles")
+    .insert(input)
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+/**
+ * Updates an existing vehicle row by id.
+ */
+export async function updateVehicle(
+  id: number,
+  input: Partial<VehicleInput>,
+): Promise<RepositoryResult<Vehicle>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vehicles")
+    .update(input)
+    .eq("id", id)
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+/**
+ * Deletes a vehicle by id.
+ */
+export async function deleteVehicle(
+  id: number,
+): Promise<RepositoryResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("vehicles").delete().eq("id", id);
+
+  return { data: null, error };
 }

@@ -34,6 +34,26 @@ export type Vehicle = {
   updated_at: string;
 };
 
+export type VehicleInput = {
+  vin: string;
+  stock_number: string;
+  make: string;
+  model: string;
+  year: number;
+  trim: string | null;
+  color: string | null;
+  interior_color: string | null;
+  mileage: number;
+  msrp: number | null;
+  invoice_cost: number | null;
+  status: VehicleStatus;
+  condition: VehicleCondition;
+  location: string | null;
+  received_date: string | null;
+  sold_date: string | null;
+  notes: string | null;
+};
+
 export type VehicleSortField =
   "year" | "make" | "mileage" | "msrp" | "received_date";
 
