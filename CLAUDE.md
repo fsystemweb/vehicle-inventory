@@ -20,7 +20,7 @@ src/
     services/             # business logic
     repositories/         # Supabase queries live only here
     actions/               # Server Actions ("use server")
-  lib/
+  lib/                      # shared, framework-agnostic helpers (formatting, client-side validation)
     supabase/
       client.ts            # browser client
       server.ts             # server client
@@ -34,6 +34,8 @@ src/
 3. API routes (`src/app/api/**`) stay thin: validate input, call a service, return a response. No business logic, no direct Supabase/repository imports.
 
 If you hit a lint error from `no-restricted-imports` on a Supabase or repository import, that's the boundary rule working as intended — fix the layering, don't disable the rule.
+
+**Client-side form validation:** forms should validate in real time (on change/blur) and disable their submit button until valid — don't make the user submit to discover errors. Real-time validation is a pure UX layer: put it in a framework-agnostic helper under `src/lib/<domain>-form-validation.ts` (e.g. `vehicle-form-validation.ts`), imported directly by the form component. It must mirror, not replace, the authoritative validation in `server/services` — the service still re-validates independently since the form is never the only caller.
 
 ## Database (Supabase)
 
@@ -93,6 +95,7 @@ Keep commits scoped to one logical change; don't bundle an unrelated fix into a 
 - `/review-ui [files]` — check a component/page against the boundary rules above.
 - `/generate-tests <file>` — generate Vitest tests for a service/repository/route.
 - `build-feature` agent — implements a full vertical slice end-to-end.
+- `bug-triage` agent — reproduces a reported bug, isolates the root cause, and implements the minimal fix.
 - `code-review` agent — reviews a diff for boundary violations and correctness.
 - `migration` agent — drafts Supabase schema migrations (SQL, with RLS).
 - `qa` agent — runs a real-browser Playwright smoke check of a feature before it's pushed; the last gate after lint/test/build.

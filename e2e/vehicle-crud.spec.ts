@@ -83,7 +83,7 @@ test.describe("vehicle inventory CRUD", () => {
     await expect(page.getByText(stockNumber)).not.toBeVisible();
   });
 
-  test("shows a friendly validation error for a too-short VIN and does not navigate away", async ({
+  test("shows a real-time inline error for a too-short VIN and keeps the submit button disabled", async ({
     page,
   }) => {
     const stockNumber = uniqueStockNumber();
@@ -99,12 +99,18 @@ test.describe("vehicle inventory CRUD", () => {
     await page.getByLabel("Mileage").fill("15000");
     await page.getByLabel("Condition").selectOption("USED");
 
-    await page.getByRole("button", { name: /Add Vehicle/i }).click();
+    // Blur the VIN field so it's marked "touched" — the inline error should
+    // appear immediately, without ever submitting the form (this is the
+    // regression case for the "errors only show up after submit" bug).
+    await page.getByLabel("Stock #").focus();
 
-    // The form's own error <p role="alert"> is distinct from Next.js's route
-    // announcer, which also carries role="alert" for accessibility.
     await expect(page.getByText("VIN must be 17 characters.")).toBeVisible();
-    // Form submission failed validation server-side: stay on the create page.
+    await expect(
+      page.getByRole("button", { name: /Add Vehicle/i }),
+    ).toBeDisabled();
+
+    // The button being disabled means a click can't submit the form at all;
+    // confirm we're still on the create page and nothing was persisted.
     await expect(page).toHaveURL(/\/dashboard\/vehicles\/new$/);
   });
 
