@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 import type { AuthError, Session, User } from "@supabase/supabase-js";
 
 export type AuthResult<T> = {
@@ -36,6 +37,13 @@ export async function signUpWithPassword(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      // Without this, Supabase falls back to the project's configured
+      // Auth "Site URL", which builds confirmation-email links against
+      // whatever host that's set to (e.g. localhost in a misconfigured
+      // project) regardless of where the app is actually running.
+      emailRedirectTo: `${getSiteUrl()}/login`,
+    },
   });
 
   return { data, error };
