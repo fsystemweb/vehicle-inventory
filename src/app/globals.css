@@ -11,6 +11,9 @@
   --muted: #6e6489;
   --danger: #dc2626;
   --mist: #f3effb;
+  --good: #1f9d6b;
+  --warning: #f59e0b;
+  --info: #2563eb;
 }
 
 @theme inline {
@@ -22,6 +25,9 @@
   --color-muted: var(--muted);
   --color-danger: var(--danger);
   --color-mist: var(--mist);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
