@@ -1,3 +1,7 @@
 node_modules
 .next
 package-lock.json
+
+# historical planning docs with hand-formatted diagrams — not live source
+.claude/specs
+.claude/plans

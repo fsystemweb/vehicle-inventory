@@ -941,19 +941,19 @@ Next.js is full-stack — there is no separate backend server or repo. "Frontend
 
 \`\`\`
 src/
-app/ # routes, layouts, pages — FRONTEND
-(dashboard)/
-api/ # route handlers — thin, delegate to server/
-components/ # UI components — FRONTEND
-server/ # BACKEND: all business logic & data access
-services/ # business logic
-repositories/ # Supabase queries live only here
-actions/ # Server Actions ("use server")
-lib/
-supabase/
-client.ts # browser client
-server.ts # server client
-types/ # shared types
+  app/                    # routes, layouts, pages — FRONTEND
+    (dashboard)/
+    api/                  # route handlers — thin, delegate to server/
+  components/             # UI components — FRONTEND
+  server/                 # BACKEND: all business logic & data access
+    services/             # business logic
+    repositories/         # Supabase queries live only here
+    actions/               # Server Actions ("use server")
+  lib/
+    supabase/
+      client.ts            # browser client
+      server.ts             # server client
+  types/                    # shared types
 \`\`\`
 
 **Rules (enforced by ESLint where possible — see `eslint.config.mjs`):**
@@ -1028,14 +1028,14 @@ This scaffold has no Vercel-specific config — a default `next build` is all Ve
 
 \`\`\`
 src/
-app/ # routes, layouts, pages, API route handlers — FRONTEND
-components/ # UI components — FRONTEND
-server/
-services/ # business logic
-repositories/ # Supabase queries — the only layer allowed to call Supabase
-actions/ # Server Actions ("use server")
-lib/supabase/ # Supabase client factories (browser + server)
-types/ # shared types
+  app/           # routes, layouts, pages, API route handlers — FRONTEND
+  components/    # UI components — FRONTEND
+  server/
+    services/       # business logic
+    repositories/    # Supabase queries — the only layer allowed to call Supabase
+    actions/          # Server Actions ("use server")
+  lib/supabase/       # Supabase client factories (browser + server)
+  types/               # shared types
 \`\`\`
 
 See `CLAUDE.md` for the full architecture boundary rules — components and pages never call Supabase directly; everything goes through `server/services` or `server/actions`.
