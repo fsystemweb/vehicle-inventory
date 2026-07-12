@@ -35,6 +35,25 @@ src/
 
 If you hit a lint error from `no-restricted-imports` on a Supabase or repository import, that's the boundary rule working as intended — fix the layering, don't disable the rule.
 
+## Git Workflow
+
+All feature work — whether done directly or by a subagent — uses standard branching and Conventional Commits. This applies to the `build-feature` and `migration` agents in particular, since they're the ones that write code and schema changes.
+
+**Branches:** create a branch off `main` before starting work, named `<type>/<short-kebab-description>`, e.g. `feat/vehicle-listing-page`, `fix/vehicle-status-filter`, `chore/update-eslint-config`. Never commit feature work directly to `main`.
+
+**Commits:** use [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`, where `<scope>` is optional (e.g. the module/domain, like `vehicles` or `auth`). Common types:
+
+- `feat` — a new feature or capability
+- `fix` — a bug fix
+- `chore` — tooling, config, dependency, or non-source changes
+- `refactor` — code change that neither fixes a bug nor adds a feature
+- `test` — adding or correcting tests
+- `docs` — documentation only
+
+Keep commits scoped to one logical change; don't bundle an unrelated fix into a feature commit.
+
+**Pushing:** creating a branch and committing locally doesn't require asking first, but pushing to the remote or opening a PR does — confirm with the user before either, per the harness's default caution around actions visible to others.
+
 ## Using the Claude Code Harness
 
 - `/create-module <domain>` — scaffold a new repository + service (+ action/route) for a domain.

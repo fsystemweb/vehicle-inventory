@@ -14,3 +14,4 @@ Conventions:
 - Write the migration as plain SQL (`create table`, `alter table`, etc.), not through the Supabase dashboard, so it's reviewable and reproducible.
 - After drafting a migration, list the corresponding `src/server/repositories/*` changes needed to use the new schema — but don't write application code changes yourself unless asked; hand off to the `build-feature` agent for that.
 - Never apply a migration to a live project without the user's explicit confirmation — drafting and reviewing SQL is your job, running `supabase db push` against a real database is a decision for the user.
+- Follow the Git Workflow convention in `CLAUDE.md`: draft the migration on a `chore/<short-kebab-description>` (or `feat/<...>` if it's part of a new feature's schema) branch off `main`, and commit it with a Conventional Commit message (e.g. `chore: add vehicles table migration`). Never push to the remote without the user's explicit confirmation.
