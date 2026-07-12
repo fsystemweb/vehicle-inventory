@@ -7,8 +7,6 @@ export type LoginActionState = {
   error: string | null;
 };
 
-export const initialLoginState: LoginActionState = { error: null };
-
 export async function loginAction(
   _prevState: LoginActionState,
   formData: FormData,

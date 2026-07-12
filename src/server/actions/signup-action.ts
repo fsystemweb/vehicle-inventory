@@ -9,12 +9,6 @@ export type SignupActionState = {
   needsEmailConfirmation: boolean;
 };
 
-export const initialSignupState: SignupActionState = {
-  error: null,
-  success: false,
-  needsEmailConfirmation: false,
-};
-
 export async function signupAction(
   _prevState: SignupActionState,
   formData: FormData,
@@ -23,13 +17,21 @@ export async function signupAction(
   const password = formData.get("password");
 
   if (typeof email !== "string" || typeof password !== "string") {
-    return { ...initialSignupState, error: "Invalid form submission." };
+    return {
+      error: "Invalid form submission.",
+      success: false,
+      needsEmailConfirmation: false,
+    };
   }
 
   const result = await signup(email, password);
 
   if (!result.success) {
-    return { ...initialSignupState, error: result.error };
+    return {
+      error: result.error,
+      success: false,
+      needsEmailConfirmation: false,
+    };
   }
 
   if (!result.needsEmailConfirmation) {

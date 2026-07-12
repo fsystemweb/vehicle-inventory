@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import {
-  initialSignupState,
   signupAction,
+  type SignupActionState,
 } from "@/server/actions/signup-action";
+
+const initialSignupState: SignupActionState = {
+  error: null,
+  success: false,
+  needsEmailConfirmation: false,
+};
 
 export function SignupForm() {
   const [state, formAction, isPending] = useActionState(
