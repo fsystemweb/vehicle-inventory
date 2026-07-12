@@ -36,6 +36,23 @@ function sortIndicator(filters: VehicleListFilters, field: VehicleSortField) {
   return filters.direction === "asc" ? " ▲" : " ▼";
 }
 
+function ChevronRightIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-5"
+    >
+      <path d="m7.5 4.5 5.5 5.5-5.5 5.5" />
+    </svg>
+  );
+}
+
 export function VehicleTable({
   vehicles,
   filters,
@@ -72,15 +89,21 @@ export function VehicleTable({
             <th className="px-4 py-3 font-semibold">Status</th>
             <th className="px-4 py-3 font-semibold">Condition</th>
             <th className="px-4 py-3 font-semibold">Location</th>
+            <th className="px-4 py-3 font-semibold">
+              <span className="sr-only">View details</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           {vehicles.map((vehicle) => (
-            <tr key={vehicle.id} className="border-b border-line last:border-0">
-              <td className="px-4 py-3 font-mono text-xs text-muted">
+            <tr
+              key={vehicle.id}
+              className="group relative border-b border-line transition-colors last:border-0 hover:bg-mist"
+            >
+              <td className="px-4 py-3 font-mono text-xs">
                 <Link
                   href={`/dashboard/vehicles/${vehicle.id}`}
-                  className="hover:text-violet"
+                  className="font-semibold text-violet after:absolute after:inset-0 hover:underline"
                 >
                   {vehicle.stock_number}
                 </Link>
@@ -110,6 +133,9 @@ export function VehicleTable({
               </td>
               <td className="px-4 py-3 text-muted">
                 {vehicle.location ?? "—"}
+              </td>
+              <td className="px-4 py-3 text-right text-foreground transition-colors group-hover:text-violet">
+                <ChevronRightIcon />
               </td>
             </tr>
           ))}

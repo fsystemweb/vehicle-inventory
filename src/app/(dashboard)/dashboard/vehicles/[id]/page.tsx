@@ -18,6 +18,23 @@ export async function generateMetadata({
   return { title: `Vehicle ${id} — Vehicle Inventory` };
 }
 
+function EditIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M13.5 3.5a2.121 2.121 0 0 1 3 3L6 17l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 function DetailField({
   label,
   value,
@@ -83,6 +100,13 @@ export default async function VehicleDetailPage({
           <div className="flex items-center gap-3">
             <StatusBadge status={vehicle.status} />
             <ConditionBadge condition={vehicle.condition} />
+            <Link
+              href={`/dashboard/vehicles/${vehicle.id}/edit`}
+              className="flex items-center gap-1.5 rounded-md bg-violet px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-violet-dark"
+            >
+              <EditIcon />
+              Edit vehicle
+            </Link>
           </div>
         </div>
       </div>
@@ -120,12 +144,6 @@ export default async function VehicleDetailPage({
       )}
 
       <div className="flex items-center gap-3">
-        <Link
-          href={`/dashboard/vehicles/${vehicle.id}/edit`}
-          className="rounded-md bg-violet px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-dark"
-        >
-          Edit
-        </Link>
         <DeleteVehicleButton id={vehicle.id} />
       </div>
     </div>
