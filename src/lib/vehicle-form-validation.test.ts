@@ -48,7 +48,19 @@ describe("getVehicleFormErrors", () => {
 
   it("flags a year outside the allowed range", () => {
     const errors = getVehicleFormErrors({ ...validValues, year: "1900" }, now);
-    expect(errors.year).toBe("Year must be between 1980 and 2028.");
+    expect(errors.year).toBe("Year must be between 1980 and 2026.");
+  });
+
+  it("flags a year greater than the current year", () => {
+    // Regression test: the year field must never accept a value beyond the
+    // current year (previously the max bound was erroneously current year + 2).
+    const errors = getVehicleFormErrors({ ...validValues, year: "2027" }, now);
+    expect(errors.year).toBe("Year must be between 1980 and 2026.");
+  });
+
+  it("does not flag a year equal to the current year", () => {
+    const errors = getVehicleFormErrors({ ...validValues, year: "2026" }, now);
+    expect(errors.year).toBeUndefined();
   });
 
   it("flags negative mileage", () => {
