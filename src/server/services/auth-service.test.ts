@@ -112,6 +112,23 @@ describe("signup", () => {
       error: "An account with this email already exists.",
     });
   });
+
+  it("maps a rate limit error to a friendly message", async () => {
+    mockedRepo.signUpWithPassword.mockResolvedValue({
+      data: null,
+      error: {
+        name: "AuthApiError",
+        message: "email rate limit exceeded",
+      } as never,
+    });
+
+    const result = await signup("driver@example.com", "password123");
+
+    expect(result).toEqual({
+      success: false,
+      error: "Too many attempts. Please try again in a few minutes.",
+    });
+  });
 });
 
 describe("logout", () => {

@@ -31,8 +31,14 @@ function validateCredentials(email: string, password: string): string | null {
 }
 
 function mapSignupError(message: string): string {
-  if (message.toLowerCase().includes("already registered")) {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("already registered")) {
     return "An account with this email already exists.";
+  }
+
+  if (lower.includes("rate limit")) {
+    return "Too many attempts. Please try again in a few minutes.";
   }
 
   return "Unable to create account. Please try again.";
