@@ -70,8 +70,7 @@ test.describe("vehicle filter stack", () => {
     // Marker that only survives soft (client-side) navigations — a full
     // page reload would wipe the window object and this would fail.
     await page.evaluate(() => {
-      (window as unknown as Record<string, unknown>).__qaNoReloadMarker =
-        true;
+      (window as unknown as Record<string, unknown>).__qaNoReloadMarker = true;
     });
 
     await page.getByLabel("Filter by make").fill("Chevrolet");
