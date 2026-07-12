@@ -54,7 +54,3 @@ These are draft/initial versions written during the foundations phase, before an
 - `npm run lint` — ESLint (includes the boundary rule)
 - `npm run format` / `npm run format:check` — Prettier
 - `npm run test` — Vitest
-
-## Current Status
-
-Foundations phase: scaffolding, tooling, and the harness are in place. No Vehicle Inventory data model, schema, or feature UI exists yet.
