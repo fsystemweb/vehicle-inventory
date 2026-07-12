@@ -1,4 +1,4 @@
-# Nextlane Design System — Reference
+# Design System — Reference
 
 > Source: extracted from the Staff AI Engineer Case Study HTML. Single source of truth for the visual language, layout philosophy, and component specs. Referenced by the `design-system` skill — read `SKILL.md` first for the summary and core rules.
 

@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Defines the Nextlane visual design system (colors, typography, spacing, radius, motion, components) that all UI in this repo follows. Use when building or styling any component or page, choosing colors/spacing/radius values, or reviewing a UI diff for visual consistency.
+description: Defines the visual design system (colors, typography, spacing, radius, motion, components) that all UI in this repo follows. Use when building or styling any component or page, choosing colors/spacing/radius values, or reviewing a UI diff for visual consistency.
 ---
 
 # Design System
