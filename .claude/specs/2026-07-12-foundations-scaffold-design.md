@@ -12,15 +12,15 @@ in this phase — this is infrastructure only.
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (App Router, TypeScript) |
-| Styling | Tailwind CSS |
+| Layer           | Choice                                                 |
+| --------------- | ------------------------------------------------------ |
+| Framework       | Next.js (App Router, TypeScript)                       |
+| Styling         | Tailwind CSS                                           |
 | Database & Auth | Supabase (free tier, not provisioned by this scaffold) |
-| Hosting | Vercel (free tier, not provisioned by this scaffold) |
-| Package manager | npm |
-| Test runner | Vitest |
-| CI | GitHub Actions |
+| Hosting         | Vercel (free tier, not provisioned by this scaffold)   |
+| Package manager | npm                                                    |
+| Test runner     | Vitest                                                 |
+| CI              | GitHub Actions                                         |
 
 ## Architecture: FE/BE Boundary
 

@@ -26,9 +26,11 @@
 ### Task 1: Bootstrap the Next.js scaffold
 
 **Files:**
+
 - Create: `.gitignore`, `eslint.config.mjs`, `next.config.ts`, `package.json`, `package-lock.json`, `postcss.config.mjs`, `tsconfig.json`, `public/*.svg`, `src/app/favicon.ico`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/page.tsx`
 
 **Interfaces:**
+
 - Produces: a building Next.js app (`npm run build` succeeds) with scripts `dev`, `build`, `start`, `lint` in `package.json`, and the `@/*` → `./src/*` path alias in `tsconfig.json`. Later tasks add `test`, `format`, `format:check` scripts to the same `package.json`.
 
 - [ ] **Step 1: Generate a fresh scaffold in a temp directory**
@@ -186,10 +188,12 @@ git commit -m "Bootstrap Next.js App Router scaffold with Tailwind and TypeScrip
 ### Task 2: Configure Vitest and add the health-service example (TDD)
 
 **Files:**
+
 - Create: `vitest.config.ts`, `src/server/services/health-service.test.ts`, `src/server/services/health-service.ts`
 - Modify: `package.json` (add `vitest` devDependency, add `test` script)
 
 **Interfaces:**
+
 - Consumes: `@/*` alias from `tsconfig.json` (Task 1).
 - Produces: `getHealthStatus(): HealthStatus` from `@/server/services/health-service`, where `HealthStatus = { status: "ok"; timestamp: string }`. Task 4 (the API route) imports this exact function and type.
 
@@ -290,10 +294,12 @@ git commit -m "Configure Vitest and add health-service example"
 ### Task 3: Supabase client scaffolding and remaining boundary directories
 
 **Files:**
+
 - Create: `src/lib/supabase/client.ts`, `src/lib/supabase/client.test.ts`, `src/lib/supabase/server.ts`, `src/lib/supabase/server.test.ts`, `.env.example`, `src/components/.gitkeep`, `src/server/repositories/.gitkeep`, `src/server/actions/.gitkeep`, `src/types/.gitkeep`, `src/app/(dashboard)/.gitkeep`
 - Modify: `package.json` (add `@supabase/ssr` dependency)
 
 **Interfaces:**
+
 - Produces: `createClient()` (sync, returns a Supabase browser client) from `@/lib/supabase/client`; `createClient()` (async, returns a Supabase server client) from `@/lib/supabase/server`. Neither is called by any other task in this plan — Task 4's route uses `health-service`, not Supabase.
 
 - [ ] **Step 1: Install `@supabase/ssr`**
@@ -426,9 +432,11 @@ git commit -m "Add Supabase client scaffolding and FE/BE boundary directories"
 ### Task 4: Health API route (proves the thin-route pattern)
 
 **Files:**
+
 - Create: `src/app/api/health/route.ts`, `src/app/api/health/route.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getHealthStatus` from `@/server/services/health-service` (Task 2).
 - Produces: `GET` handler at `src/app/api/health/route.ts`, reachable at `/api/health`.
 
@@ -504,10 +512,12 @@ git commit -m "Add /api/health as a thin-route example over health-service"
 ### Task 5: ESLint FE/BE boundary rule and Prettier
 
 **Files:**
+
 - Modify: `eslint.config.mjs`, `package.json` (add `format`/`format:check` scripts, add `prettier` devDependency)
 - Create: `.prettierrc.json`, `.prettierignore`
 
 **Interfaces:**
+
 - Produces: `npm run lint` fails on any import of `@/lib/supabase/*` or `@/server/repositories/*` from `src/app/**` or `src/components/**`. `npm run format` / `npm run format:check` scripts.
 
 - [ ] **Step 1: Install Prettier**
@@ -639,9 +649,11 @@ git commit -m "Add ESLint FE/BE boundary rule and Prettier formatting"
 ### Task 6: GitHub Actions CI pipeline
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 **Interfaces:**
+
 - Consumes: `lint`, `format:check`, `test` scripts from `package.json` (Tasks 1, 2, 5).
 
 - [ ] **Step 1: Write the workflow**
@@ -695,6 +707,7 @@ git commit -m "Add GitHub Actions CI pipeline (lint, format check, test)"
 ### Task 7: Claude Code agent harness
 
 **Files:**
+
 - Create: `.claude/commands/create-module.md`, `.claude/commands/review-ui.md`, `.claude/commands/generate-tests.md`, `.claude/agents/build-feature.md`, `.claude/agents/code-review.md`, `.claude/agents/migration.md`, `.claude/skills/scaffold-crud.md`, `.claude/skills/react-form.md`, `.claude/skills/api-endpoint.md`
 
 - [ ] **Step 1: Create `.claude/commands/create-module.md`**
@@ -767,12 +780,14 @@ model: inherit
 You implement features end-to-end in this Next.js App Router codebase. Before writing any code, read `CLAUDE.md` for the FE/BE boundary rules — they are non-negotiable, not suggestions.
 
 Rules you must follow:
+
 - `src/server/repositories/**` is the only place allowed to import `@/lib/supabase/*`.
 - `src/server/services/**` contains business logic and imports only from repositories.
 - `src/server/actions/**` (`"use server"`) and `src/app/api/**/route.ts` are thin — they call services, they don't contain business logic or touch Supabase directly.
 - `src/app/**` and `src/components/**` never import Supabase or repositories directly. This is enforced by an ESLint rule — if your code fails lint on this, fix the layering, don't disable the rule.
 
 Workflow for a typical feature:
+
 1. Confirm the entity shape and any Supabase schema it depends on. If the schema doesn't exist yet, hand off to the `migration` agent or ask the user first — don't invent a schema.
 2. Build bottom-up: repository → service → (action and/or route) → UI.
 3. Write a Vitest test for the service layer as you go (see the `generate-tests` command for conventions) — don't leave testing until the end.
@@ -817,6 +832,7 @@ model: inherit
 You draft Supabase (Postgres) schema migrations for this project. No schema exists yet as of the foundations phase — the first migration for any table starts here.
 
 Conventions:
+
 - Migrations live under `supabase/migrations/` (Supabase CLI convention: `<timestamp>_<description>.sql`). Create that directory the first time it's needed.
 - Every table gets Row Level Security enabled (`alter table ... enable row level security;`) and explicit policies — never ship a table without RLS in a Supabase project that has auth enabled.
 - Write the migration as plain SQL (`create table`, `alter table`, etc.), not through the Supabase dashboard, so it's reviewable and reproducible.
@@ -905,6 +921,7 @@ git commit -m "Add draft Claude Code agent harness (commands, agents, skills)"
 ### Task 8: CLAUDE.md and README.md
 
 **Files:**
+
 - Create: `CLAUDE.md`, `README.md`
 
 - [ ] **Step 1: Create `CLAUDE.md`**
@@ -924,19 +941,19 @@ Next.js is full-stack — there is no separate backend server or repo. "Frontend
 
 \`\`\`
 src/
-  app/                    # routes, layouts, pages — FRONTEND
-    (dashboard)/
-    api/                  # route handlers — thin, delegate to server/
-  components/             # UI components — FRONTEND
-  server/                 # BACKEND: all business logic & data access
-    services/             # business logic
-    repositories/         # Supabase queries live only here
-    actions/               # Server Actions ("use server")
-  lib/
-    supabase/
-      client.ts            # browser client
-      server.ts             # server client
-  types/                    # shared types
+app/ # routes, layouts, pages — FRONTEND
+(dashboard)/
+api/ # route handlers — thin, delegate to server/
+components/ # UI components — FRONTEND
+server/ # BACKEND: all business logic & data access
+services/ # business logic
+repositories/ # Supabase queries live only here
+actions/ # Server Actions ("use server")
+lib/
+supabase/
+client.ts # browser client
+server.ts # server client
+types/ # shared types
 \`\`\`
 
 **Rules (enforced by ESLint where possible — see `eslint.config.mjs`):**
@@ -981,14 +998,14 @@ Foundations for the Vehicle Inventory module of the DMS system. This phase is in
 
 ## Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (App Router, TypeScript) |
-| Styling | Tailwind CSS |
-| Database & Auth | Supabase |
-| Hosting | Vercel |
-| Tests | Vitest |
-| CI | GitHub Actions |
+| Layer           | Choice                           |
+| --------------- | -------------------------------- |
+| Framework       | Next.js (App Router, TypeScript) |
+| Styling         | Tailwind CSS                     |
+| Database & Auth | Supabase                         |
+| Hosting         | Vercel                           |
+| Tests           | Vitest                           |
+| CI              | GitHub Actions                   |
 
 ## Getting Started
 
@@ -1011,28 +1028,28 @@ This scaffold has no Vercel-specific config — a default `next build` is all Ve
 
 \`\`\`
 src/
-  app/           # routes, layouts, pages, API route handlers — FRONTEND
-  components/    # UI components — FRONTEND
-  server/
-    services/       # business logic
-    repositories/    # Supabase queries — the only layer allowed to call Supabase
-    actions/          # Server Actions ("use server")
-  lib/supabase/       # Supabase client factories (browser + server)
-  types/               # shared types
+app/ # routes, layouts, pages, API route handlers — FRONTEND
+components/ # UI components — FRONTEND
+server/
+services/ # business logic
+repositories/ # Supabase queries — the only layer allowed to call Supabase
+actions/ # Server Actions ("use server")
+lib/supabase/ # Supabase client factories (browser + server)
+types/ # shared types
 \`\`\`
 
 See `CLAUDE.md` for the full architecture boundary rules — components and pages never call Supabase directly; everything goes through `server/services` or `server/actions`.
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the dev server |
-| `npm run build` | Production build |
-| `npm run lint` | ESLint, including the FE/BE boundary rule |
-| `npm run format` | Prettier — write formatting fixes |
-| `npm run format:check` | Prettier — check only, used in CI |
-| `npm run test` | Run the Vitest suite |
+| Command                | Description                               |
+| ---------------------- | ----------------------------------------- |
+| `npm run dev`          | Start the dev server                      |
+| `npm run build`        | Production build                          |
+| `npm run lint`         | ESLint, including the FE/BE boundary rule |
+| `npm run format`       | Prettier — write formatting fixes         |
+| `npm run format:check` | Prettier — check only, used in CI         |
+| `npm run test`         | Run the Vitest suite                      |
 
 ## Claude Code Harness
 
