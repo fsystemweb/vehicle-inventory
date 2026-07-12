@@ -130,6 +130,54 @@ function sanitizeSearchTerm(rawSearch: string): string {
     .replace(/[%_]/g, (match) => `\\${match}`);
 }
 
+/**
+ * Escapes ILIKE wildcards (`%`/`_`) out of a single-column text filter so a
+ * raw value can't be used to widen or break the pattern match. Unlike
+ * `sanitizeSearchTerm`, commas are left alone since these values are never
+ * combined into an `.or()` filter.
+ */
+function sanitizeTextFilter(rawValue: string): string {
+  return rawValue.trim().replace(/[%_]/g, (match) => `\\${match}`);
+}
+
+/**
+ * Normalizes a min/max numeric range pair: non-finite values are dropped,
+ * and a min greater than max is treated as no constraint on either end
+ * (an impossible range from stale/tampered URL params, not a real filter).
+ */
+function normalizeRange(
+  min: number | undefined,
+  max: number | undefined,
+): { min?: number; max?: number } {
+  const validMin = min != null && Number.isFinite(min) ? min : undefined;
+  const validMax = max != null && Number.isFinite(max) ? max : undefined;
+
+  if (validMin != null && validMax != null && validMin > validMax) {
+    return {};
+  }
+
+  return { min: validMin, max: validMax };
+}
+
+/**
+ * Normalizes a from/to date-string range pair. Malformed dates and an
+ * inverted range (from after to) are dropped rather than treated as errors,
+ * since these arrive via editable URL search params.
+ */
+function normalizeDateRange(
+  from: string | undefined,
+  to: string | undefined,
+): { from?: string; to?: string } {
+  const validFrom = from && !Number.isNaN(Date.parse(from)) ? from : undefined;
+  const validTo = to && !Number.isNaN(Date.parse(to)) ? to : undefined;
+
+  if (validFrom && validTo && validFrom > validTo) {
+    return {};
+  }
+
+  return { from: validFrom, to: validTo };
+}
+
 function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
   const normalized: VehicleListFilters = {};
 
@@ -147,6 +195,50 @@ function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
       normalized.search = sanitized;
     }
   }
+
+  if (filters.vin) {
+    const sanitized = sanitizeTextFilter(filters.vin);
+    if (sanitized) normalized.vin = sanitized;
+  }
+
+  if (filters.stockNumber) {
+    const sanitized = sanitizeTextFilter(filters.stockNumber);
+    if (sanitized) normalized.stockNumber = sanitized;
+  }
+
+  if (filters.make) {
+    const sanitized = sanitizeTextFilter(filters.make);
+    if (sanitized) normalized.make = sanitized;
+  }
+
+  if (filters.model) {
+    const sanitized = sanitizeTextFilter(filters.model);
+    if (sanitized) normalized.model = sanitized;
+  }
+
+  if (filters.location) {
+    const sanitized = sanitizeTextFilter(filters.location);
+    if (sanitized) normalized.location = sanitized;
+  }
+
+  const yearRange = normalizeRange(filters.yearMin, filters.yearMax);
+  normalized.yearMin = yearRange.min;
+  normalized.yearMax = yearRange.max;
+
+  const mileageRange = normalizeRange(filters.mileageMin, filters.mileageMax);
+  normalized.mileageMin = mileageRange.min;
+  normalized.mileageMax = mileageRange.max;
+
+  const msrpRange = normalizeRange(filters.msrpMin, filters.msrpMax);
+  normalized.msrpMin = msrpRange.min;
+  normalized.msrpMax = msrpRange.max;
+
+  const receivedDateRange = normalizeDateRange(
+    filters.receivedDateFrom,
+    filters.receivedDateTo,
+  );
+  normalized.receivedDateFrom = receivedDateRange.from;
+  normalized.receivedDateTo = receivedDateRange.to;
 
   normalized.sort =
     filters.sort && VEHICLE_SORT_FIELDS.includes(filters.sort)
