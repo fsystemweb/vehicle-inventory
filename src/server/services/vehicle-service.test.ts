@@ -421,6 +421,84 @@ describe("listVehicles", () => {
       pagination: { page: 1, pageSize: 20, totalCount: 0, totalPages: 1 },
     });
   });
+
+  it("recovers onto the actual last page when the requested page is out of range", async () => {
+    const lastPageVehicles = [vehicle({ id: 45 })];
+
+    mockedRepo.listVehicles
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: "PGRST103", message: "range not satisfiable" } as never,
+        count: null,
+      })
+      .mockResolvedValueOnce({ data: [], error: null, count: 45 })
+      .mockResolvedValueOnce({
+        data: lastPageVehicles,
+        error: null,
+        count: 45,
+      });
+
+    const result = await listVehicles({ page: 999 });
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: lastPageVehicles,
+      pagination: { page: 3, pageSize: 20, totalCount: 45, totalPages: 3 },
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ page: 999 }),
+    );
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ page: 1 }),
+    );
+    expect(mockedRepo.listVehicles).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ page: 3 }),
+    );
+  });
+
+  it("falls back to the already-fetched page 1 when there's only one page", async () => {
+    const onlyPageVehicles = [vehicle()];
+
+    mockedRepo.listVehicles
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: "PGRST103", message: "range not satisfiable" } as never,
+        count: null,
+      })
+      .mockResolvedValueOnce({
+        data: onlyPageVehicles,
+        error: null,
+        count: 3,
+      });
+
+    const result = await listVehicles({ page: 12 });
+
+    expect(result).toEqual({
+      success: true,
+      vehicles: onlyPageVehicles,
+      pagination: { page: 1, pageSize: 20, totalCount: 3, totalPages: 1 },
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
+  });
+
+  it("still returns a friendly error for a non-range repository failure", async () => {
+    mockedRepo.listVehicles.mockResolvedValue({
+      data: null,
+      error: { code: "500", message: "connection error" } as never,
+      count: null,
+    });
+
+    const result = await listVehicles({ page: 5 });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Unable to load vehicles. Please try again.",
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("getDashboardSummary", () => {

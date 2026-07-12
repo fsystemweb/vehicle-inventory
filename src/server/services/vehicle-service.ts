@@ -265,15 +265,50 @@ function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
 }
 
 /**
+ * PostgREST's error code for a `.range()` offset that starts beyond the
+ * actual number of matching rows (an out-of-range page — e.g. a stale
+ * bookmark, or a filter change that shrank the result set). PostgREST
+ * rejects the request outright rather than returning an empty page.
+ */
+const RANGE_NOT_SATISFIABLE_CODE = "PGRST103";
+
+/**
  * Lists vehicles for the dashboard table. Unrecognized filter values (which
  * can arrive via editable URL search params) are ignored rather than
  * treated as errors.
+ *
+ * A requested `page` past the end of the result set is recovered rather
+ * than surfaced as a failure: page 1 is always a valid offset, so it's used
+ * to learn the real count, and — when there's more than one page — a
+ * follow-up fetch lands on the actual last page instead of silently
+ * substituting page 1.
  */
 export async function listVehicles(
   filters: VehicleListFilters,
 ): Promise<VehicleListResult> {
   const normalized = normalizeFilters(filters);
-  const { data, error, count } = await listVehiclesFromRepo(normalized);
+  let { data, error, count } = await listVehiclesFromRepo(normalized);
+  let page = normalized.page ?? 1;
+  const pageSize = normalized.pageSize ?? VEHICLE_LIST_PAGE_SIZE;
+
+  if (error?.code === RANGE_NOT_SATISFIABLE_CODE && page > 1) {
+    const firstPage = await listVehiclesFromRepo({ ...normalized, page: 1 });
+    const totalPages = Math.max(
+      1,
+      Math.ceil((firstPage.count ?? 0) / pageSize),
+    );
+
+    if (totalPages > 1) {
+      ({ data, error, count } = await listVehiclesFromRepo({
+        ...normalized,
+        page: totalPages,
+      }));
+      page = totalPages;
+    } else {
+      ({ data, error, count } = firstPage);
+      page = 1;
+    }
+  }
 
   if (error) {
     return {
@@ -282,8 +317,6 @@ export async function listVehicles(
     };
   }
 
-  const page = normalized.page ?? 1;
-  const pageSize = normalized.pageSize ?? VEHICLE_LIST_PAGE_SIZE;
   const totalCount = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
