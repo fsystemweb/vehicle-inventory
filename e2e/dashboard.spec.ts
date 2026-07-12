@@ -78,7 +78,8 @@ test.describe("vehicle inventory dashboard", () => {
     await expect(page).toHaveURL(/search=Silverado/);
     await expect(page.getByRole("row")).toHaveCount(2); // header + 1 match
     await expect(page.getByText("STK1007")).toBeVisible();
-    await expect(page.getByText("Silverado")).toBeVisible();
+    // Scoped to a table cell — the active-filter chip also renders "Silverado".
+    await expect(page.getByRole("cell", { name: "Silverado" })).toBeVisible();
     await expect(page.getByText("STK1001")).not.toBeVisible();
   });
 
