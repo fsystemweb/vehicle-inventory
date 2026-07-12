@@ -11,7 +11,7 @@ const AUTH_PATHS = ["/login", "/signup"];
  * `@supabase/ssr` middleware pattern — see
  * https://supabase.com/docs/guides/auth/server-side/nextjs
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
