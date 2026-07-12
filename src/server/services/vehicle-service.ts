@@ -9,16 +9,23 @@ import {
 } from "@/server/repositories/vehicle-repository";
 import {
   VEHICLE_CONDITIONS,
+  VEHICLE_LIST_PAGE_SIZE,
   VEHICLE_SORT_FIELDS,
   VEHICLE_STATUSES,
   type DashboardSummary,
   type Vehicle,
   type VehicleInput,
   type VehicleListFilters,
+  type VehiclePaginationMeta,
 } from "@/types/vehicle";
 
 export type VehicleListResult =
-  { success: true; vehicles: Vehicle[] } | { success: false; error: string };
+  | {
+      success: true;
+      vehicles: Vehicle[];
+      pagination: VehiclePaginationMeta;
+    }
+  | { success: false; error: string };
 
 export type DashboardSummaryResult =
   | { success: true; summary: DashboardSummary }
@@ -247,6 +254,13 @@ function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
 
   normalized.direction = filters.direction === "asc" ? "asc" : "desc";
 
+  normalized.page =
+    filters.page != null && Number.isFinite(filters.page) && filters.page >= 1
+      ? Math.floor(filters.page)
+      : 1;
+
+  normalized.pageSize = VEHICLE_LIST_PAGE_SIZE;
+
   return normalized;
 }
 
@@ -258,7 +272,8 @@ function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
 export async function listVehicles(
   filters: VehicleListFilters,
 ): Promise<VehicleListResult> {
-  const { data, error } = await listVehiclesFromRepo(normalizeFilters(filters));
+  const normalized = normalizeFilters(filters);
+  const { data, error, count } = await listVehiclesFromRepo(normalized);
 
   if (error) {
     return {
@@ -267,7 +282,16 @@ export async function listVehicles(
     };
   }
 
-  return { success: true, vehicles: data ?? [] };
+  const page = normalized.page ?? 1;
+  const pageSize = normalized.pageSize ?? VEHICLE_LIST_PAGE_SIZE;
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  return {
+    success: true,
+    vehicles: data ?? [],
+    pagination: { page, pageSize, totalCount, totalPages },
+  };
 }
 
 /**

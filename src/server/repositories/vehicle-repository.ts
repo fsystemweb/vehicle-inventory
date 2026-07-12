@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type {
-  Vehicle,
-  VehicleInput,
-  VehicleListFilters,
+import {
+  VEHICLE_LIST_PAGE_SIZE,
+  type Vehicle,
+  type VehicleInput,
+  type VehicleListFilters,
 } from "@/types/vehicle";
 import type { PostgrestError } from "@supabase/supabase-js";
 
@@ -12,15 +13,26 @@ export type RepositoryResult<T> = {
 };
 
 /**
- * Lists vehicles matching the given filters. This is the only layer allowed
- * to call the Supabase client directly.
+ * Same shape as `RepositoryResult`, plus the total row count matching the
+ * filters (independent of pagination) so the service layer can compute
+ * total pages.
+ */
+export type VehicleListRepositoryResult = RepositoryResult<Vehicle[]> & {
+  count: number | null;
+};
+
+/**
+ * Lists vehicles matching the given filters, paginated via `filters.page`/
+ * `filters.pageSize` (both default when omitted, defensively — callers are
+ * expected to normalize these first, same as `sort`/`direction`). This is
+ * the only layer allowed to call the Supabase client directly.
  */
 export async function listVehicles(
   filters: VehicleListFilters,
-): Promise<RepositoryResult<Vehicle[]>> {
+): Promise<VehicleListRepositoryResult> {
   const supabase = await createClient();
 
-  let query = supabase.from("vehicles").select("*");
+  let query = supabase.from("vehicles").select("*", { count: "exact" });
 
   if (filters.status) {
     query = query.eq("status", filters.status);
@@ -93,9 +105,15 @@ export async function listVehicles(
     ascending: filters.direction === "asc",
   });
 
-  const { data, error } = await query;
+  const page = filters.page ?? 1;
+  const pageSize = filters.pageSize ?? VEHICLE_LIST_PAGE_SIZE;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  query = query.range(from, to);
 
-  return { data, error };
+  const { data, error, count } = await query;
+
+  return { data, error, count };
 }
 
 /**

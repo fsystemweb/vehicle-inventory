@@ -183,6 +183,9 @@ export function VehicleFilterStack() {
         params.delete(key);
       }
     }
+    // A filter change can put the current page out of range, so drop it
+    // and let the list land back on page 1 rather than stranding the user.
+    params.delete("page");
     navigate(params);
   }
 
@@ -202,6 +205,9 @@ export function VehicleFilterStack() {
     } else {
       params.delete(key);
     }
+    // Same rationale as commitDraft: a filter change can invalidate the
+    // current page, so reset back to page 1.
+    params.delete("page");
     navigate(params);
   }
 
@@ -210,6 +216,7 @@ export function VehicleFilterStack() {
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete(key);
+    params.delete("page");
     navigate(params);
 
     if ((DEBOUNCED_KEYS as readonly string[]).includes(key)) {
@@ -226,6 +233,7 @@ export function VehicleFilterStack() {
     for (const key of VEHICLE_FILTER_PARAM_KEYS) {
       params.delete(key);
     }
+    params.delete("page");
     navigate(params);
 
     const resetDraft = Object.fromEntries(
