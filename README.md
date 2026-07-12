@@ -79,27 +79,27 @@ See `CLAUDE.md` for the full architecture boundary rules — components and page
 
 ### Commands & skills
 
-| Name              | Defined in                          | Use for                                                             |
-| ----------------- | ------------------------------------ | -------------------------------------------------------------------- |
-| `/create-module`  | `.claude/commands/create-module.md`  | Scaffold a new repository + service (+ action/route) for a domain    |
-| `/generate-tests` | `.claude/commands/generate-tests.md` | Generate Vitest tests for a service/repository/route                 |
-| `/review-ui`      | `.claude/commands/review-ui.md`      | Check a component/page against the FE/BE boundary rules              |
-| `scaffold-crud`   | `.claude/skills/scaffold-crud.md`    | Implementation pattern for CRUD features                             |
-| `react-form`      | `.claude/skills/react-form.md`       | Implementation pattern for real-time-validated forms                 |
-| `api-endpoint`    | `.claude/skills/api-endpoint.md`     | Implementation pattern for thin API routes                           |
-| `design-system`   | `.claude/skills/design-system/`      | Visual design system (colors, typography, spacing, radius, motion)   |
+| Name              | Defined in                           | Use for                                                            |
+| ----------------- | ------------------------------------ | ------------------------------------------------------------------ |
+| `/create-module`  | `.claude/commands/create-module.md`  | Scaffold a new repository + service (+ action/route) for a domain  |
+| `/generate-tests` | `.claude/commands/generate-tests.md` | Generate Vitest tests for a service/repository/route               |
+| `/review-ui`      | `.claude/commands/review-ui.md`      | Check a component/page against the FE/BE boundary rules            |
+| `scaffold-crud`   | `.claude/skills/scaffold-crud.md`    | Implementation pattern for CRUD features                           |
+| `react-form`      | `.claude/skills/react-form.md`       | Implementation pattern for real-time-validated forms               |
+| `api-endpoint`    | `.claude/skills/api-endpoint.md`     | Implementation pattern for thin API routes                         |
+| `design-system`   | `.claude/skills/design-system/`      | Visual design system (colors, typography, spacing, radius, motion) |
 
 Invoke a command by typing its slash form (e.g. `/review-ui src/components/VehicleTable.tsx`); skills are pulled in automatically when relevant, or you can name one explicitly.
 
 ### Agents
 
-| Agent          | Defined in                     | Day       | Use for                                                                          |
-| -------------- | -------------------------------- | --------- | ----------------------------------------------------------------------------- |
-| `build-feature`| `.claude/agents/build-feature.md`| Day 1     | Implement a full vertical slice end-to-end (repository → service → action/route → UI) |
-| `migration`    | `.claude/agents/migration.md`    | Day 1     | Draft a Supabase schema migration (SQL, with RLS)                             |
-| `bug-triage`   | `.claude/agents/bug-triage.md`   | Day 2     | Reproduce a reported bug, isolate the root cause, ship the minimal fix         |
-| `code-review`  | `.claude/agents/code-review.md`  | Day 2     | Review a diff for boundary violations and correctness before merging          |
-| `qa`           | `.claude/agents/qa.md`           | Day 2     | Real-browser Playwright smoke check — the last gate before pushing            |
+| Agent           | Defined in                        | Day   | Use for                                                                               |
+| --------------- | --------------------------------- | ----- | ------------------------------------------------------------------------------------- |
+| `build-feature` | `.claude/agents/build-feature.md` | Day 1 | Implement a full vertical slice end-to-end (repository → service → action/route → UI) |
+| `migration`     | `.claude/agents/migration.md`     | Day 1 | Draft a Supabase schema migration (SQL, with RLS)                                     |
+| `bug-triage`    | `.claude/agents/bug-triage.md`    | Day 2 | Reproduce a reported bug, isolate the root cause, ship the minimal fix                |
+| `code-review`   | `.claude/agents/code-review.md`   | Day 2 | Review a diff for boundary violations and correctness before merging                  |
+| `qa`            | `.claude/agents/qa.md`            | Day 2 | Real-browser Playwright smoke check — the last gate before pushing                    |
 
 **Running the agents yourself:** agents don't have a slash-command form — you describe the task in plain language and Claude Code spawns the matching agent, or you can name one explicitly if you want to be sure which one runs:
 

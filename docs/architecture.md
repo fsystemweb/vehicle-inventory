@@ -1,6 +1,6 @@
 # Architecture
 
-This is a single Next.js application deployed on Vercel — there is no separate backend server or repo. "Frontend/backend separation" here means strict import boundaries *within* that one app, not separate deployments. See `CLAUDE.md` for the enforced rules; this document is the picture.
+This is a single Next.js application deployed on Vercel — there is no separate backend server or repo. "Frontend/backend separation" here means strict import boundaries _within_ that one app, not separate deployments. See `CLAUDE.md` for the enforced rules; this document is the picture.
 
 ## Diagram
 
@@ -22,14 +22,14 @@ flowchart LR
 
 ## Layers and how they relate
 
-| Layer | Where | Responsibility | Can call |
-|---|---|---|---|
-| **Frontend** | `src/app/**`, `src/components/**` | Routes, layouts, pages, UI. Renders data, collects input. | Server Actions, API routes — **never** Supabase directly |
-| **API routes** | `src/app/api/**` | Thin HTTP entry points: validate input, call a service, return a response. | Services only |
-| **Server Actions** | `src/server/actions/**` (`"use server"`) | Thin mutation entry points invoked directly from components. | Services only |
-| **Services** | `src/server/services/**` | All business logic: validation, domain rules, orchestration. | Repositories only |
-| **Repositories** | `src/server/repositories/**` | The *only* layer allowed to import the Supabase client. Runs queries. | Supabase (Postgres + Auth) |
-| **Supabase** | hosted (or local via Docker) | Postgres database with Row Level Security policies, and Auth (sessions, users). | — |
+| Layer              | Where                                    | Responsibility                                                                  | Can call                                                 |
+| ------------------ | ---------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Frontend**       | `src/app/**`, `src/components/**`        | Routes, layouts, pages, UI. Renders data, collects input.                       | Server Actions, API routes — **never** Supabase directly |
+| **API routes**     | `src/app/api/**`                         | Thin HTTP entry points: validate input, call a service, return a response.      | Services only                                            |
+| **Server Actions** | `src/server/actions/**` (`"use server"`) | Thin mutation entry points invoked directly from components.                    | Services only                                            |
+| **Services**       | `src/server/services/**`                 | All business logic: validation, domain rules, orchestration.                    | Repositories only                                        |
+| **Repositories**   | `src/server/repositories/**`             | The _only_ layer allowed to import the Supabase client. Runs queries.           | Supabase (Postgres + Auth)                               |
+| **Supabase**       | hosted (or local via Docker)             | Postgres database with Row Level Security policies, and Auth (sessions, users). | —                                                        |
 
 This layering is enforced by `no-restricted-imports` in `eslint.config.mjs` — a component importing `@/lib/supabase/*` or a repository, or a route/action containing business logic, fails lint by design.
 
