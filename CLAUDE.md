@@ -62,6 +62,7 @@ Keep commits scoped to one logical change; don't bundle an unrelated fix into a 
 - `build-feature` agent — implements a full vertical slice end-to-end.
 - `code-review` agent — reviews a diff for boundary violations and correctness.
 - `migration` agent — drafts Supabase schema migrations (SQL, with RLS).
+- `qa` agent — runs a real-browser Playwright smoke check of a feature before it's pushed; the last gate after lint/test/build.
 - `scaffold-crud`, `react-form`, `api-endpoint` skills — implementation patterns for CRUD, forms, and API routes respectively.
 - `design-system` skill — the visual design system (colors, typography, spacing, radius, motion, components) all UI work in this repo should follow.
 
@@ -74,3 +75,4 @@ These are draft/initial versions written during the foundations phase, before an
 - `npm run lint` — ESLint (includes the boundary rule)
 - `npm run format` / `npm run format:check` — Prettier
 - `npm run test` — Vitest
+- `npm run test:e2e` — Playwright (real-browser e2e specs under `e2e/`)
