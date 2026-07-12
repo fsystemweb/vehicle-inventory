@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ConditionBadge } from "@/components/vehicles/ConditionBadge";
 import { StatusBadge } from "@/components/vehicles/StatusBadge";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { formatCurrency, formatMileage } from "@/lib/format";
 import type {
   Vehicle,
@@ -8,11 +9,19 @@ import type {
   VehicleSortField,
 } from "@/types/vehicle";
 
-const SORTABLE_COLUMNS: { field: VehicleSortField; label: string }[] = [
+const SORTABLE_COLUMNS: {
+  field: VehicleSortField;
+  label: string;
+  tooltip?: string;
+}[] = [
   { field: "year", label: "Year" },
   { field: "make", label: "Make / Model" },
   { field: "mileage", label: "Mileage" },
-  { field: "msrp", label: "MSRP" },
+  {
+    field: "msrp",
+    label: "MSRP",
+    tooltip: "Manufacturer's Suggested Retail Price",
+  },
   { field: "received_date", label: "Received" },
 ];
 
@@ -77,13 +86,16 @@ export function VehicleTable({
             <th className="px-4 py-3 font-semibold">VIN</th>
             {SORTABLE_COLUMNS.map((column) => (
               <th key={column.field} className="px-4 py-3 font-semibold">
-                <Link
-                  href={buildSortHref(filters, column.field)}
-                  className="hover:text-violet"
-                >
-                  {column.label}
-                  {sortIndicator(filters, column.field)}
-                </Link>
+                <span className="inline-flex items-center gap-1">
+                  <Link
+                    href={buildSortHref(filters, column.field)}
+                    className="hover:text-violet"
+                  >
+                    {column.label}
+                    {sortIndicator(filters, column.field)}
+                  </Link>
+                  {column.tooltip ? <Tooltip label={column.tooltip} /> : null}
+                </span>
               </th>
             ))}
             <th className="px-4 py-3 font-semibold">Status</th>
