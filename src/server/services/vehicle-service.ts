@@ -273,6 +273,23 @@ function normalizeFilters(filters: VehicleListFilters): VehicleListFilters {
 const RANGE_NOT_SATISFIABLE_CODE = "PGRST103";
 
 /**
+ * Retries a repository call exactly once when it fails. Immediately after
+ * login, the very first request on a page can race the session cookie
+ * still propagating (or a plain cold-start blip) and fail transiently —
+ * the same request reliably succeeds a moment later, which is exactly what
+ * a manual refresh does today. One immediate retry smooths over that race
+ * without masking a real, repeatable failure (which still surfaces after
+ * the retry also fails).
+ */
+async function withOneRetry<T>(
+  run: () => Promise<T>,
+  shouldRetry: (result: T) => boolean,
+): Promise<T> {
+  const first = await run();
+  return shouldRetry(first) ? run() : first;
+}
+
+/**
  * Lists vehicles for the dashboard table. Unrecognized filter values (which
  * can arrive via editable URL search params) are ignored rather than
  * treated as errors.
@@ -287,7 +304,14 @@ export async function listVehicles(
   filters: VehicleListFilters,
 ): Promise<VehicleListResult> {
   const normalized = normalizeFilters(filters);
-  let { data, error, count } = await listVehiclesFromRepo(normalized);
+  let { data, error, count } = await withOneRetry(
+    () => listVehiclesFromRepo(normalized),
+    // Out-of-range pagination is a real, deterministic condition handled
+    // explicitly below — retrying it verbatim would just fail again, so
+    // only transient (non-pagination) errors get the extra attempt.
+    (result) =>
+      result.error != null && result.error.code !== RANGE_NOT_SATISFIABLE_CODE,
+  );
   let page = normalized.page ?? 1;
   const pageSize = normalized.pageSize ?? VEHICLE_LIST_PAGE_SIZE;
 
@@ -334,7 +358,10 @@ export async function listVehicles(
 export async function getDashboardSummary(
   now: Date = new Date(),
 ): Promise<DashboardSummaryResult> {
-  const { data, error } = await getVehicleAggregateRows();
+  const { data, error } = await withOneRetry(
+    () => getVehicleAggregateRows(),
+    (result) => result.error != null || !result.data,
+  );
 
   if (error || !data) {
     return {

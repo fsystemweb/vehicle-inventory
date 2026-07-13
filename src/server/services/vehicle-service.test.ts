@@ -130,7 +130,7 @@ describe("listVehicles", () => {
     );
   });
 
-  it("returns a friendly error when the repository fails", async () => {
+  it("returns a friendly error when the repository fails twice in a row", async () => {
     mockedRepo.listVehicles.mockResolvedValue({
       data: null,
       error: { message: "connection error" } as never,
@@ -143,6 +143,27 @@ describe("listVehicles", () => {
       success: false,
       error: "Unable to load vehicles. Please try again.",
     });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries exactly once and succeeds when the first attempt is a transient failure", async () => {
+    const vehicles = [vehicle()];
+    mockedRepo.listVehicles
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: "connection error" } as never,
+        count: null,
+      })
+      .mockResolvedValueOnce({ data: vehicles, error: null, count: 1 });
+
+    const result = await listVehicles({});
+
+    expect(result).toEqual({
+      success: true,
+      vehicles,
+      pagination: { page: 1, pageSize: 20, totalCount: 1, totalPages: 1 },
+    });
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
   });
 
   it("passes through sanitized single-column text filters", async () => {
@@ -484,7 +505,7 @@ describe("listVehicles", () => {
     expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
   });
 
-  it("still returns a friendly error for a non-range repository failure", async () => {
+  it("still returns a friendly error for a non-range repository failure that persists through the retry", async () => {
     mockedRepo.listVehicles.mockResolvedValue({
       data: null,
       error: { code: "500", message: "connection error" } as never,
@@ -497,7 +518,7 @@ describe("listVehicles", () => {
       success: false,
       error: "Unable to load vehicles. Please try again.",
     });
-    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(1);
+    expect(mockedRepo.listVehicles).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -560,7 +581,7 @@ describe("getDashboardSummary", () => {
     expect(result.success && result.summary.soldThisMonthCount).toBe(0);
   });
 
-  it("returns a friendly error when the repository fails", async () => {
+  it("returns a friendly error when the repository fails twice in a row", async () => {
     mockedRepo.getVehicleAggregateRows.mockResolvedValue({
       data: null,
       error: { message: "connection error" } as never,
@@ -572,6 +593,33 @@ describe("getDashboardSummary", () => {
       success: false,
       error: "Unable to load dashboard summary. Please try again.",
     });
+    expect(mockedRepo.getVehicleAggregateRows).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries exactly once and succeeds when the first attempt is a transient failure", async () => {
+    mockedRepo.getVehicleAggregateRows
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: "connection error" } as never,
+      })
+      .mockResolvedValueOnce({
+        data: [{ status: "IN_STOCK", msrp: 30000, sold_date: null }],
+        error: null,
+      });
+
+    const result = await getDashboardSummary(new Date("2026-07-12T00:00:00Z"));
+
+    expect(result).toEqual({
+      success: true,
+      summary: {
+        inStockCount: 1,
+        pendingCount: 0,
+        inTransitCount: 0,
+        soldThisMonthCount: 0,
+        totalInStockValue: 30000,
+      },
+    });
+    expect(mockedRepo.getVehicleAggregateRows).toHaveBeenCalledTimes(2);
   });
 });
 
