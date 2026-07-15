@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { VehicleForm } from "@/components/vehicles/VehicleForm";
 import { createVehicleAction } from "@/server/actions/vehicle-actions";
+import { listBrandNames } from "@/server/services/brand-service";
 
 export const metadata: Metadata = {
   title: "Add Vehicle — Vehicle Inventory",
 };
 
-export default function NewVehiclePage() {
+export default async function NewVehiclePage() {
+  const brandsResult = await listBrandNames();
+  const brands = brandsResult.success
+    ? brandsResult.brands.map((b) => b.name)
+    : [];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -25,7 +31,11 @@ export default function NewVehiclePage() {
         </p>
       </div>
 
-      <VehicleForm action={createVehicleAction} submitLabel="Add Vehicle" />
+      <VehicleForm
+        action={createVehicleAction}
+        submitLabel="Add Vehicle"
+        brands={brands}
+      />
     </div>
   );
 }

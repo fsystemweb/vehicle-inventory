@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { VehicleForm } from "@/components/vehicles/VehicleForm";
 import { updateVehicleAction } from "@/server/actions/vehicle-actions";
+import { listBrandNames } from "@/server/services/brand-service";
 import { getVehicle } from "@/server/services/vehicle-service";
 
 type EditVehiclePageProps = {
@@ -24,6 +25,10 @@ export default async function EditVehiclePage({
   }
 
   const result = await getVehicle(id);
+  const brandsResult = await listBrandNames();
+  const brands = brandsResult.success
+    ? brandsResult.brands.map((b) => b.name)
+    : [];
 
   if (!result.success) {
     if (result.error === "Vehicle not found.") {
@@ -58,6 +63,7 @@ export default async function EditVehiclePage({
         action={updateVehicleAction}
         defaultValues={result.vehicle}
         submitLabel="Save Changes"
+        brands={brands}
       />
     </div>
   );

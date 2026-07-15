@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { CONDITION_LABEL } from "@/components/vehicles/ConditionBadge";
+import { MakeAutocomplete } from "@/components/vehicles/MakeAutocomplete";
 import { STATUS_LABEL } from "@/components/vehicles/StatusBadge";
 import {
   getVehicleFormErrors,
@@ -57,10 +58,12 @@ export function VehicleForm({
   action,
   defaultValues,
   submitLabel,
+  brands = [],
 }: {
   action: VehicleFormAction;
   defaultValues?: Vehicle;
   submitLabel: string;
+  brands?: string[];
 }) {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
@@ -167,16 +170,17 @@ export function VehicleForm({
         </Field>
 
         <Field label="Make" htmlFor="make" error={fieldError("make")}>
-          <input
+          <MakeAutocomplete
             id="make"
             name="make"
-            type="text"
-            required
             value={validatedValues.make}
-            onChange={updateField("make")}
+            onChange={(value) =>
+              setValidatedValues((prev) => ({ ...prev, make: value }))
+            }
             onBlur={markTouched("make")}
-            aria-invalid={Boolean(fieldError("make"))}
-            className={inputClass}
+            options={brands}
+            error={fieldError("make")}
+            ariaInvalid={Boolean(fieldError("make"))}
           />
         </Field>
 
