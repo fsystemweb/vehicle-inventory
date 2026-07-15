@@ -8,6 +8,29 @@ const inputClass =
 const MAX_SUGGESTIONS = 8;
 
 /**
+ * Splits `name` around the first case-insensitive occurrence of `term` so
+ * the matching substring can be emphasized in the suggestion list. Falls
+ * back to the plain name when there's no match (shouldn't happen for
+ * options already filtered by `term`, but keeps this safe to reuse).
+ */
+function highlightMatch(name: string, term: string) {
+  if (!term) return name;
+
+  const index = name.toLowerCase().indexOf(term.toLowerCase());
+  if (index === -1) return name;
+
+  return (
+    <>
+      {name.slice(0, index)}
+      <mark className="bg-transparent font-semibold text-violet">
+        {name.slice(index, index + term.length)}
+      </mark>
+      {name.slice(index + term.length)}
+    </>
+  );
+}
+
+/**
  * Free-text "Make" field with autocomplete suggestions sourced from the
  * `brands` reference table. Any value can be typed and submitted — matching
  * a known brand is never required (see `getVehicleFormErrors`, which only
@@ -41,14 +64,16 @@ export function MakeAutocomplete({
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
+  const term = value.trim();
+
   const matches = useMemo(() => {
-    const term = value.trim().toLowerCase();
-    if (!term) return [];
+    const lowerTerm = term.toLowerCase();
+    if (!lowerTerm) return [];
 
     return options
-      .filter((option) => option.toLowerCase().includes(term))
+      .filter((option) => option.toLowerCase().includes(lowerTerm))
       .slice(0, MAX_SUGGESTIONS);
-  }, [options, value]);
+  }, [options, term]);
 
   const isOpen = isFocused && matches.length > 0;
 
@@ -117,7 +142,7 @@ export function MakeAutocomplete({
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute z-10 mt-1 w-full rounded-md border border-line bg-white py-1 text-sm shadow-md"
+          className="animate-dropdown-in absolute z-10 mt-1 w-full rounded-md border border-line bg-white py-1 text-sm shadow-md"
         >
           {matches.map((option, index) => (
             <li key={option} role="presentation">
@@ -131,11 +156,17 @@ export function MakeAutocomplete({
                   selectOption(option);
                 }}
                 onMouseEnter={() => setActiveIndex(index)}
-                className={`w-full px-3 py-1.5 text-left hover:bg-mist ${
+                className={`flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors duration-[120ms] hover:bg-mist ${
                   index === activeIndex ? "bg-mist" : ""
                 }`}
               >
-                {option}
+                <span
+                  aria-hidden="true"
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-mist text-xs font-semibold text-violet"
+                >
+                  {option.charAt(0).toUpperCase()}
+                </span>
+                <span className="truncate">{highlightMatch(option, term)}</span>
               </button>
             </li>
           ))}
